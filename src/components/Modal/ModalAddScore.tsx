@@ -139,6 +139,7 @@ const ModalAddScore = ({
         ))}
       </DialogContent>
       <DialogActions sx={styles.action}>
+        <Button onClick={onClose}>Cancel</Button>
         <Button
           variant='contained'
           onClick={() => {
