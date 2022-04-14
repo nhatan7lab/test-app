@@ -106,18 +106,21 @@ function App() {
             </>
           )}
         </Grid>
-        <Fab
-          sx={styles.fabBtn}
-          color='primary'
-          aria-label='add'
-          onClick={() =>
-            listPlayer && listPlayer.length > 0
-              ? setIsShowModalAddScore(true)
-              : setIsShowModalAddPlayer(true)
-          }
-        >
-          <AddIcon />
-        </Fab>
+
+        <Box sx={styles.menu}>
+          <Fab
+            sx={styles.fabBtn}
+            color='primary'
+            aria-label='add'
+            onClick={() =>
+              listPlayer && listPlayer.length > 0
+                ? setIsShowModalAddScore(true)
+                : setIsShowModalAddPlayer(true)
+            }
+          >
+            <AddIcon />
+          </Fab>
+        </Box>
       </Grid>
     </Box>
   );
@@ -131,10 +134,11 @@ const styles: StyleSheet = {
 
   container: {
     '@media (min-width:780px)': {
-      position: 'relative',
       width: '40vw',
-      height: '98vh',
+      position: 'relative',
     },
+
+    height: '98vh',
   },
 
   app: {
@@ -160,10 +164,18 @@ const styles: StyleSheet = {
     fontWeight: 600,
   },
 
+  menu: {
+    position: 'absolute',
+    bottom: 54,
+    right: 65,
+  },
+
   fabBtn: {
     position: 'fixed',
-    bottom: 16,
-    right: 16,
+    '@media (max-width:780px)': {
+      bottom: 16,
+      right: 16,
+    },
   },
 };
 
