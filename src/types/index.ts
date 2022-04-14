@@ -12,4 +12,4 @@ export type Score = {
   score: number;
 };
 
-export type StyleSheet = Record<string, React.CSSProperties> & SxProps<Theme>;
+export type StyleSheet = Record<string, SxProps<Theme>>;

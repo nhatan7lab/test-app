@@ -133,16 +133,18 @@ const styles: StyleSheet = {
     '@media (min-width:780px)': {
       position: 'relative',
       width: '40vw',
-      height: '80vh',
+      height: '98vh',
     },
   },
 
   app: {
     backgroundColor: '#f5f5f5',
-    boxShadow: 1,
+    boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
   },
 
   header: {
+    position: 'sticky',
+    top: 0,
     px: 2.5,
     py: 2,
     backgroundColor: '#f7f7f7',

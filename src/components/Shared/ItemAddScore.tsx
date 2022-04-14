@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { StyleSheet } from '../../types';
@@ -37,8 +37,9 @@ const ItemScore = ({
             onDecrement(id, round);
           }}
         />
-        <input
-          style={styles.input}
+        <TextField
+          variant='standard'
+          sx={styles.input}
           type='number'
           value={currentScore}
           onChange={(event) => {
@@ -79,17 +80,17 @@ const styles: StyleSheet = {
   },
 
   input: {
-    outline: 'none',
-    fontSize: '1.3rem',
-    border: 0,
-    width: '30px',
-    textAlign: 'center',
-    borderBottom: '1px solid #027cd4',
+    input: {
+      textAlign: 'center',
+      fontSize: '1.35rem',
+    },
+    width: '40px',
   },
 
   icon: {
-    m: 0.5,
-    p: 0.3,
+    my: 0.5,
+    mx: 1,
+    p: 0.9,
     backgroundColor: '#f1f1f1',
     borderRadius: '50%',
   },

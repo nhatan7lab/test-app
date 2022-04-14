@@ -81,7 +81,9 @@ const ListMain = ({ round, listPlayer }: Props) => {
             <TableRow key={indexRow} sx={styles.row}>
               <TableCell sx={styles.round}>{indexRow + 1}</TableCell>
               {row.map((score, indexScore) => (
-                <TableCell key={indexScore} align='center'>{score}</TableCell>
+                <TableCell key={indexScore} align='center'>
+                  {score}
+                </TableCell>
               ))}
             </TableRow>
           ))}
