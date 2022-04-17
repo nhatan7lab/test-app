@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Fab, IconButton } from '@mui/material';
+import { useState } from 'react';
+import { Fab, IconButton, Grid, Box, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+
 import ModalAddPlayer from './components/Modal/ModalAddPlayer';
-import { Player, StyleSheet } from './types';
+import { StyleSheet } from './types';
 import TableScore from './components/Table/TableScore';
-import { Grid, Box, Typography } from '@mui/material';
 import ModalAddScore from './components/Modal/ModalAddScore';
 import ModalConfirmRefresh from './components/Modal/ModalConfirmRefresh';
-import {
-  saveDataList,
-  readDataList,
-  saveDataRound,
-  readDataRound,
-} from './utils/localStorage';
+import useScoreStore from 'store';
 
 function App() {
   const [isShowModalAddPlayer, setIsShowModalAddPlayer] =
@@ -21,40 +16,8 @@ function App() {
   const [isShowModalAddScore, setIsShowModalAddScore] =
     useState<boolean>(false);
   const [isShowModalRefresh, setIsShowModalRefresh] = useState<boolean>(false);
-  const [listPlayer, setListPlayer] = useState<Player[]>([] as Player[]);
-  const [round, setRound] = useState<number>(1);
 
-  const handleAddScore = (listPlayer: Player[]) => {
-    const currentRound = round;
-    setRound(currentRound + 1);
-    saveDataRound(currentRound + 1);
-    setListPlayer(listPlayer);
-    setIsShowModalAddScore(false);
-  };
-
-  const handleAddPlayers = (listPlayer: Player[]) => {
-    setIsShowModalAddPlayer(false);
-    setListPlayer(listPlayer);
-  };
-
-  const handleReset = () => {
-    setListPlayer([]);
-    setRound(1);
-    saveDataList([]);
-    saveDataRound(1);
-    setIsShowModalRefresh(false);
-  };
-
-  useEffect(() => {
-    const list = readDataList();
-    const round = readDataRound();
-    setListPlayer(list);
-    setRound(round);
-  }, []);
-
-  useEffect(() => {
-    if (listPlayer.length !== 0) saveDataList(listPlayer);
-  }, [listPlayer]);
+  const listPlayer = useScoreStore((state) => state.players);
 
   return (
     <Box sx={styles.main}>
@@ -64,26 +27,24 @@ function App() {
             <Typography sx={styles.title}>List Score</Typography>
             <Box>
               {listPlayer && listPlayer.length > 0 && (
-                <>
-                  <IconButton
-                    onClick={() => setIsShowModalRefresh(true)}
-                    color='primary'
-                    aria-label='Refresh'
-                  >
-                    <AutorenewIcon />
-                  </IconButton>
-                </>
+                <IconButton
+                  onClick={() => setIsShowModalRefresh(true)}
+                  color='primary'
+                  sx={styles.icon}
+                  aria-label='Refresh'
+                >
+                  <AutorenewIcon />
+                </IconButton>
               )}
             </Box>
           </Box>
-          <TableScore round={round} listPlayer={listPlayer} />
+          <TableScore />
 
           {listPlayer && listPlayer.length === 0 && (
             <>
               <ModalAddPlayer
                 isOpen={isShowModalAddPlayer}
                 onClose={() => setIsShowModalAddPlayer(false)}
-                onSubmit={handleAddPlayers}
               />
             </>
           )}
@@ -92,15 +53,11 @@ function App() {
             <>
               <ModalAddScore
                 isOpen={isShowModalAddScore}
-                onSubmit={handleAddScore}
-                listPlayer={listPlayer}
-                currentRound={round}
                 onClose={() => setIsShowModalAddScore(false)}
               />
 
               <ModalConfirmRefresh
                 isOpen={isShowModalRefresh}
-                onSubmit={handleReset}
                 onClose={() => setIsShowModalRefresh(false)}
               />
             </>
@@ -134,11 +91,16 @@ const styles: StyleSheet = {
 
   container: {
     '@media (min-width:780px)': {
+      width: '60vw',
+      position: 'relative',
+    },
+
+    '@media (min-width:992px)': {
       width: '40vw',
       position: 'relative',
     },
 
-    height: '98vh',
+    height: '100vh',
   },
 
   app: {
@@ -150,12 +112,29 @@ const styles: StyleSheet = {
     position: 'sticky',
     top: 0,
     px: 2.5,
-    py: 2,
+    py: 1.25,
     backgroundColor: '#f7f7f7',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottom: '1px solid #e6e6e6',
+  },
+
+  icon: {
+    my: 0.5,
+    p: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f1f1f1',
+    border: '1.5px solid #e0e0e0',
+    borderRadius: '50%',
+    transition: 'all 0.3s',
+    boxShadow: 1,
+    '&:hover': {
+      transform: 'scale(1.1)',
+      color: '#d32f2f',
+    },
   },
 
   title: {
@@ -166,8 +145,8 @@ const styles: StyleSheet = {
 
   menu: {
     position: 'absolute',
-    bottom: 54,
-    right: 65,
+    bottom: 66,
+    right: 66,
   },
 
   fabBtn: {

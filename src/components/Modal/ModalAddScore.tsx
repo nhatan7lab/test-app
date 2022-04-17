@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button,
   Dialog,
@@ -6,145 +6,76 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import { Player, StyleSheet } from '../../types';
-import ItemScore from '../Shared/ItemAddScore';
+import SaveIcon from '@mui/icons-material/Save';
+
+import ItemScore from 'components/Shared/ItemAddScore';
+import useDebounce from 'hooks/useDebounce';
+import { Player, Score, StyleSheet } from 'types';
+import useScoreStore, { ScoreStore } from 'store';
 
 type Props = {
   isOpen: boolean;
-  listPlayer: Player[];
-  currentRound: number;
   onClose: () => void;
-  onSubmit: (listPlayer: Player[]) => void;
 };
 
-const ModalAddScore = ({
-  isOpen,
-  listPlayer,
-  currentRound,
-  onClose,
-  onSubmit,
-}: Props) => {
-  const [listPlayerTemp, setListPlayerTemp] = useState<Player[]>(listPlayer);
+const ModalAddScore = ({ isOpen, onClose }: Props) => {
+  const listPlayer = useScoreStore((state: ScoreStore) => state.players);
+  const currentRound = useScoreStore((state: ScoreStore) => state.round);
+  const addScore = useScoreStore((state: ScoreStore) => state.addScore);
+  const setRound = useScoreStore((state: ScoreStore) => state.setRound);
 
-  let debounceTimer: ReturnType<typeof setTimeout>;
-  const TIMEOUT: number = 500;
+  const getInitialScore = useCallback(
+    (): Score[] =>
+      listPlayer.map((player: Player) => ({
+        accessor: player.name,
+        score: 0,
+        round: currentRound,
+      })),
+    [currentRound, listPlayer],
+  );
 
-  const debounce = (
-    callback: (id: string, round: number, value?: number) => void,
-    time: number,
-  ): void => {
-    clearTimeout(debounceTimer);
-    setTimeout(callback, time);
+  const [listScore, setListScore] = useState<Score[]>(getInitialScore());
+
+  const handleSetScore = (id: string, value: number) => {
+    const indexScore = listScore.findIndex((score) => score.accessor === id);
+    if (indexScore >= 0) {
+      listScore[indexScore].score = value;
+      setListScore([...listScore]);
+    }
   };
 
-  const handleIncrement = (id: string, round: number): void =>
-    debounce(() => {
-      const indexPlayer = listPlayerTemp.findIndex(
-        (player) => player.name === id,
-      );
-      if (indexPlayer >= 0) {
-        const indexScore = listPlayerTemp[indexPlayer].scores.findIndex(
-          (score) => score.round === round,
-        );
-        if (indexScore >= 0) {
-          listPlayerTemp[indexPlayer].scores[indexScore].score++;
-          listPlayerTemp[indexPlayer].total++;
-        } else {
-          listPlayerTemp[indexPlayer].scores.push({
-            accessor: listPlayerTemp[indexPlayer].name,
-            score: 1,
-            round,
-          });
-          listPlayerTemp[indexPlayer].total++;
-        }
-
-        setListPlayerTemp([...listPlayerTemp]);
-      }
-    }, TIMEOUT);
-
-  const handleDecrement = (id: string, round: number): void =>
-    debounce(() => {
-      const indexPlayer = listPlayerTemp.findIndex(
-        (player) => player.name === id,
-      );
-      if (indexPlayer >= 0) {
-        const indexScore = listPlayerTemp[indexPlayer].scores.findIndex(
-          (score) => score.round === round,
-        );
-        if (indexScore >= 0) {
-          listPlayerTemp[indexPlayer].scores[indexScore].score--;
-          listPlayerTemp[indexPlayer].total--;
-        } else {
-          listPlayerTemp[indexPlayer].scores.push({
-            accessor: listPlayerTemp[indexPlayer].name,
-            score: -1,
-            round,
-          });
-          listPlayerTemp[indexPlayer].total--;
-        }
-
-        setListPlayerTemp([...listPlayerTemp]);
-      }
-    }, TIMEOUT);
-
-  const handleChange = (id: string, round: number, value: number): void =>
-    debounce(() => {
-      const indexPlayer = listPlayerTemp.findIndex(
-        (player) => player.name === id,
-      );
-      if (indexPlayer >= 0) {
-        const indexScore = listPlayerTemp[indexPlayer].scores.findIndex(
-          (score) => score.round === round,
-        );
-        if (indexScore >= 0) {
-          listPlayerTemp[indexPlayer].scores[indexScore].score = value;
-          listPlayerTemp[indexPlayer].total += value;
-        } else {
-          listPlayerTemp[indexPlayer].scores.push({
-            accessor: listPlayerTemp[indexPlayer].name,
-            score: value,
-            round,
-          });
-          listPlayerTemp[indexPlayer].total = value;
-        }
-      }
-
-      setListPlayerTemp([...listPlayerTemp]);
-    }, TIMEOUT);
-
-  const getScore = (player: Player, round: number) => {
-    const score = player.scores.find((score) => score.round === round);
-    return score?.score ?? 0;
-  };
+  const [handleSubmit] = useDebounce(() => {
+    listScore.map((score) => addScore(score));
+    setRound(currentRound + 1);
+    onClose();
+  });
 
   useEffect(() => {
-    setListPlayerTemp(listPlayer);
-  }, [listPlayer]);
+    setListScore(getInitialScore());
+  }, [getInitialScore, isOpen]);
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth>
       <DialogTitle sx={styles.title}>Add Score</DialogTitle>
       <DialogContent>
-        {listPlayerTemp.map((player, index) => (
+        {listPlayer.map((player, index) => (
           <ItemScore
             key={index}
             id={player.name}
             name={player.name}
-            round={currentRound}
-            score={getScore(player, currentRound)}
-            onChange={handleChange}
-            onIncrement={handleIncrement}
-            onDecrement={handleDecrement}
+            onChange={handleSetScore}
           />
         ))}
       </DialogContent>
       <DialogActions sx={styles.action}>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button variant='outlined' size='medium' onClick={onClose}>
+          Cancel
+        </Button>
         <Button
           variant='contained'
-          onClick={() => {
-            debounce(() => onSubmit(listPlayerTemp), 300);
-          }}
+          size='medium'
+          startIcon={<SaveIcon />}
+          onClick={handleSubmit}
         >
           Add
         </Button>
@@ -155,8 +86,9 @@ const ModalAddScore = ({
 
 const styles: StyleSheet = {
   title: {
-    fontWeight: 'bold',
-    fontSize: '1.25rem',
+    py: 2,
+    fontWeight: 600,
+    fontSize: '1.4rem',
     backgroundColor: '#1976d2',
     color: '#fff',
   },

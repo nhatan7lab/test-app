@@ -1,29 +1,21 @@
-import React, { useState } from 'react';
+import { useState, memo } from 'react';
 import { Box, TextField, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { StyleSheet } from '../../types';
+
+import { StyleSheet } from 'types';
+import useDebounce from 'hooks/useDebounce';
 
 type Props = {
   id: string;
   name: string;
-  score: number;
-  round: number;
-  onChange: (id: string, round: number, value: number) => void;
-  onIncrement: (id: string, round: number) => void;
-  onDecrement: (id: string, round: number) => void;
+  onChange: (id: string, value: number) => void;
 };
 
-const ItemScore = ({
-  id,
-  name,
-  score,
-  round,
-  onIncrement,
-  onDecrement,
-  onChange,
-}: Props) => {
-  const [currentScore, setCurrentScore] = useState<number>(score);
+const ItemScore = memo(({ id, name, onChange }: Props) => {
+  const [currentScore, setCurrentScore] = useState<number>(0);
+
+  const [handleChange] = useDebounce((value: number) => onChange(id, value));
 
   return (
     <Box sx={styles.container}>
@@ -32,9 +24,9 @@ const ItemScore = ({
         <RemoveIcon
           sx={styles.icon}
           color='primary'
-          onClick={(event) => {
+          onClick={() => {
             setCurrentScore(currentScore - 1);
-            onDecrement(id, round);
+            handleChange(currentScore - 1);
           }}
         />
         <TextField
@@ -43,22 +35,22 @@ const ItemScore = ({
           type='number'
           value={currentScore}
           onChange={(event) => {
-            onChange(id, round, +event.target.value);
             setCurrentScore(+event.target.value);
+            handleChange(+event.target.value);
           }}
         />
         <AddIcon
           sx={styles.icon}
           color='primary'
-          onClick={(event) => {
+          onClick={() => {
             setCurrentScore(currentScore + 1);
-            onIncrement(id, round);
+            handleChange(currentScore + 1);
           }}
         />
       </Box>
     </Box>
   );
-};
+});
 
 const styles: StyleSheet = {
   container: {
@@ -70,6 +62,8 @@ const styles: StyleSheet = {
 
   name: {
     fontSize: '1.25rem',
+    color: '#616161',
+    fontWeight: 600,
     flexGrow: 1,
   },
 
@@ -92,6 +86,7 @@ const styles: StyleSheet = {
     mx: 1,
     p: 0.9,
     backgroundColor: '#f1f1f1',
+    border: '1.5px solid #e0e0e0',
     borderRadius: '50%',
   },
 };

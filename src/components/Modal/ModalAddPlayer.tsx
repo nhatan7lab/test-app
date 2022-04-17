@@ -1,67 +1,72 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
 } from '@mui/material';
-import { Score, Player, StyleSheet } from '../../types';
+
+import { Score, Player, StyleSheet } from 'types';
+import useDebounce from 'hooks/useDebounce';
+import useScoreStore, { ScoreStore } from 'store';
+import ItemAddPlayer from 'components/Shared/ItemAddPlayer';
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (listPlayer: Player[]) => void;
 };
 
 type InputPlayer = Player & { id: string };
 
-const ModalAddPlayer = ({ isOpen, onClose, onSubmit }: Props) => {
+const ModalAddPlayer = ({ isOpen, onClose }: Props) => {
   const [listInputPlayer, setListInputPlayer] = useState<InputPlayer[]>(
     [] as InputPlayer[],
   );
 
-  const TIMEOUT: number = 500;
-  let debounceTimer: ReturnType<typeof setTimeout>;
+  const addPlayers = useScoreStore((state: ScoreStore) => state.addPlayers);
 
-  const handleChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      const id = event.target.name;
-      const currentName = event.target.value;
-      const existingPlayerIndex = listInputPlayer.findIndex(
-        (player) => player.id === event.target.name,
-      );
-
-      if (existingPlayerIndex >= 0) {
-        listInputPlayer[existingPlayerIndex].name = currentName;
-      } else {
-        listInputPlayer.push({
-          id,
-          name: currentName,
-          scores: [] as Score[],
-          total: 0,
-        });
-      }
-
-      const list = listInputPlayer.filter((inputPlayer) => !!inputPlayer.name);
-
-      setListInputPlayer(list);
-    }, TIMEOUT);
-  };
-
-  const getListPlayer = (): Player[] =>
-    listInputPlayer.map(
-      (player) =>
-        ({
-          name: player.name,
-          scores: player.scores,
-          total: player.total,
-        } as Player),
+  const handleChange = useCallback((id: string, name: string) => {
+    const existingPlayerIndex = listInputPlayer.findIndex(
+      (player: InputPlayer) => player.id === id,
     );
+
+    if (existingPlayerIndex >= 0) {
+      listInputPlayer[existingPlayerIndex].name = name;
+    } else {
+      listInputPlayer.push({
+        id,
+        name,
+        scores: [] as Score[],
+        total: 0,
+      });
+    }
+
+    const list = listInputPlayer
+      .filter((inputPlayer) => inputPlayer.name !== '')
+      .sort((player1, player2) => player1.id.localeCompare(player2.id));
+
+    setListInputPlayer(list);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getListPlayer = useCallback(
+    (listInputPlayer: InputPlayer[]): Player[] =>
+      listInputPlayer.map(
+        (player) =>
+          ({
+            name: player.name,
+            scores: player.scores,
+            total: player.total,
+          } as Player),
+      ),
+    [],
+  );
+
+  const [handleSetPlayers] = useDebounce(() => {
+    addPlayers(getListPlayer(listInputPlayer));
+    onClose();
+  });
 
   useEffect(() => {
     setListInputPlayer([]);
@@ -72,24 +77,21 @@ const ModalAddPlayer = ({ isOpen, onClose, onSubmit }: Props) => {
       <DialogTitle sx={styles.title}>Add Player</DialogTitle>
       <DialogContent>
         {Array.from({ length: 4 }, (_, i) => i + 1).map((num) => (
-          <TextField
+          <ItemAddPlayer
             key={num}
-            autoFocus
+            autoFocus={num === 1}
             label={`Player ${num}`}
             name={`player${num}`}
             type='text'
             fullWidth
-            onChange={(e) => handleChange(e)}
+            onSetName={handleChange}
             variant='standard'
-            sx={{
-              my: 1,
-            }}
           />
         ))}
       </DialogContent>
       <DialogActions sx={styles.action}>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant='contained' onClick={() => onSubmit(getListPlayer())}>
+        <Button variant='contained' onClick={handleSetPlayers}>
           Add
         </Button>
       </DialogActions>
@@ -99,8 +101,9 @@ const ModalAddPlayer = ({ isOpen, onClose, onSubmit }: Props) => {
 
 const styles: StyleSheet = {
   title: {
-    fontWeight: 'bold',
-    fontSize: '1.25rem',
+    py: 2,
+    fontWeight: 600,
+    fontSize: '1.4rem',
     backgroundColor: '#1976d2',
     color: '#fff',
   },

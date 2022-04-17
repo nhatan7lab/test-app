@@ -7,61 +7,44 @@ import {
   TableCell,
   Paper,
 } from '@mui/material';
-import { Player, StyleSheet } from '../../types';
 
-type Props = {
-  round: number;
-  listPlayer: Player[];
-};
+import useScoreStore, { ScoreStore } from 'store';
+import { Player, Score, StyleSheet } from 'types';
+import { groupBy } from 'utils/array';
 
-const ListMain = ({ round, listPlayer }: Props) => {
-  const listColumn = listPlayer.map((player) => ({
-    header: player.name,
-  }));
+const TableScore = () => {
+  const listPlayer: Player[] = useScoreStore(
+    (state: ScoreStore) => state.players,
+  );
 
-  const getListScore = (round: number) => {
-    const listScore = [];
-    for (let i = 1; i < round; i++) {
-      const listScoreTmp = [];
-      for (let j = 0; j < listColumn.length; j++) {
-        const player = listPlayer.find(
-          (player) => player.name === listColumn[j].header,
-        );
-        if (player) {
-          const score = player.scores.find((sc) => sc.round === i);
-          if (score) {
-            listScoreTmp.push(score.score);
-          } else {
-            listScoreTmp.push(0);
-          }
-        } else {
-          listScoreTmp.push(0);
-        }
-      }
-      listScore.push(listScoreTmp);
-    }
-    return listScore;
+  const listHeader: string[] = listPlayer.map((player: Player) => player.name);
+
+  const getListScore = (): Score[][] => {
+    const listScore: Score[] = listPlayer
+      .map((player: Player) => player.scores)
+      .flat();
+
+    const listScoreByRound = groupBy<Score>(
+      listScore,
+      (score) => `${score.round}`,
+    );
+    return listScoreByRound;
   };
 
-  const getSumScoreByPlayer = (player: Player): number => {
-    return player.scores.reduce((total, player) => (total += player.score), 0);
-  };
-
-  const getListScoreTotal = (): number[] => {
-    return listPlayer.map((player) => getSumScoreByPlayer(player));
-  };
+  const getListScoreTotal = (): number[] =>
+    listPlayer.map((player) => player.total);
 
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
-            {listColumn.length > 0 && (
+            {listHeader.length > 0 && (
               <TableCell sx={styles.titleRound}>#</TableCell>
             )}
-            {listColumn.map((col, index) => (
+            {listHeader.map((col, index) => (
               <TableCell sx={styles.cellRound} key={index}>
-                {col.header}
+                {col}
               </TableCell>
             ))}
           </TableRow>
@@ -77,12 +60,12 @@ const ListMain = ({ round, listPlayer }: Props) => {
               ))}
             </TableRow>
           )}
-          {getListScore(round).map((row, indexRow) => (
+          {getListScore().map((row: Score[], indexRow: number) => (
             <TableRow key={indexRow} sx={styles.row}>
               <TableCell sx={styles.round}>{indexRow + 1}</TableCell>
-              {row.map((score, indexScore) => (
+              {row.map((score: Score, indexScore: number) => (
                 <TableCell key={indexScore} align='center'>
-                  {score}
+                  {score.score}
                 </TableCell>
               ))}
             </TableRow>
@@ -132,4 +115,4 @@ const styles: StyleSheet = {
   },
 };
 
-export default ListMain;
+export default TableScore;
