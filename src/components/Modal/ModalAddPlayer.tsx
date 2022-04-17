@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { Score, Player, StyleSheet } from 'types';
 import useDebounce from 'hooks/useDebounce';
@@ -90,8 +91,15 @@ const ModalAddPlayer = ({ isOpen, onClose }: Props) => {
         ))}
       </DialogContent>
       <DialogActions sx={styles.action}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant='contained' onClick={handleSetPlayers}>
+        <Button variant='outlined' size='medium' onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant='contained'
+          size='medium'
+          startIcon={<SaveIcon />}
+          onClick={handleSetPlayers}
+        >
           Add
         </Button>
       </DialogActions>
