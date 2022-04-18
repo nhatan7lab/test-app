@@ -44,7 +44,11 @@ const ModalAddPlayer = ({ isOpen, onClose }: Props) => {
     }
 
     const list = listInputPlayer
-      .filter((inputPlayer) => inputPlayer.name !== '')
+      .filter(
+        (inputPlayer: InputPlayer, index: number, self: InputPlayer[]) =>
+          inputPlayer.name !== '' &&
+          index === self.findIndex((_) => _.name === inputPlayer.name),
+      )
       .sort((player1, player2) => player1.id.localeCompare(player2.id));
 
     setListInputPlayer(list);
