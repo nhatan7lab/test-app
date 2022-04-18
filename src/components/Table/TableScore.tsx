@@ -27,7 +27,8 @@ const TableScore = () => {
     const listScoreByRound = groupBy<Score>(
       listScore,
       (score) => `${score.round}`,
-    );
+    ).reverse();
+
     return listScoreByRound;
   };
 
@@ -39,9 +40,6 @@ const TableScore = () => {
       <Table>
         <TableHead>
           <TableRow>
-            {listHeader.length > 0 && (
-              <TableCell sx={styles.titleRound}>#</TableCell>
-            )}
             {listHeader.map((col, index) => (
               <TableCell sx={styles.cellRound} key={index}>
                 {col}
@@ -52,7 +50,6 @@ const TableScore = () => {
         <TableBody>
           {listPlayer.length > 0 && (
             <TableRow>
-              <TableCell sx={styles.titleTotal}></TableCell>
               {getListScoreTotal().map((cell, index) => (
                 <TableCell key={index} sx={styles.cellTotal}>
                   {cell}
@@ -62,7 +59,6 @@ const TableScore = () => {
           )}
           {getListScore().map((row: Score[], indexRow: number) => (
             <TableRow key={indexRow} sx={styles.row}>
-              <TableCell sx={styles.round}>{indexRow + 1}</TableCell>
               {row.map((score: Score, indexScore: number) => (
                 <TableCell key={indexScore} align='center'>
                   {score.score}

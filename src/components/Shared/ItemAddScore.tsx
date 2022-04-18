@@ -13,7 +13,7 @@ type Props = {
 };
 
 const ItemScore = memo(({ id, name, onChange }: Props) => {
-  const [currentScore, setCurrentScore] = useState<number>(0);
+  const [currentScore, setCurrentScore] = useState<string>('0');
 
   const [handleChange] = useDebounce((value: number) => onChange(id, value));
 
@@ -25,26 +25,35 @@ const ItemScore = memo(({ id, name, onChange }: Props) => {
           sx={styles.icon}
           color='primary'
           onClick={() => {
-            setCurrentScore(currentScore - 1);
-            handleChange(currentScore - 1);
+            if (Number.isInteger(+currentScore)) {
+              setCurrentScore(+currentScore - 1 + '');
+              handleChange(+currentScore - 1);
+            }
           }}
         />
         <TextField
           variant='standard'
           sx={styles.input}
-          type='number'
+          type='tel'
           value={currentScore}
           onChange={(event) => {
-            setCurrentScore(+event.target.value);
-            handleChange(+event.target.value);
+            if (
+              Number.isInteger(+event.target.value) ||
+              event.target.value === '-'
+            ) {
+              setCurrentScore(event.target.value);
+              handleChange(+event.target.value);
+            }
           }}
         />
         <AddIcon
           sx={styles.icon}
           color='primary'
           onClick={() => {
-            setCurrentScore(currentScore + 1);
-            handleChange(currentScore + 1);
+            if (Number.isInteger(+currentScore)) {
+              setCurrentScore(+currentScore + 1 + '');
+              handleChange(+currentScore + 1);
+            }
           }}
         />
       </Box>

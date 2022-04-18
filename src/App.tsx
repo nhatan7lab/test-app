@@ -3,11 +3,11 @@ import { Fab, IconButton, Grid, Box, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 
-import ModalAddPlayer from './components/Modal/ModalAddPlayer';
-import { StyleSheet } from './types';
-import TableScore from './components/Table/TableScore';
-import ModalAddScore from './components/Modal/ModalAddScore';
-import ModalConfirmRefresh from './components/Modal/ModalConfirmRefresh';
+import ModalAddPlayer from 'components/Modal/ModalAddPlayer';
+import { StyleSheet } from 'types';
+import TableScore from 'components/Table/TableScore';
+import ModalAddScore from 'components/Modal/ModalAddScore';
+import ModalConfirmRefresh from 'components/Modal/ModalConfirmRefresh';
 import useScoreStore from 'store';
 
 function App() {
@@ -41,12 +41,10 @@ function App() {
           <TableScore />
 
           {listPlayer && listPlayer.length === 0 && (
-            <>
-              <ModalAddPlayer
-                isOpen={isShowModalAddPlayer}
-                onClose={() => setIsShowModalAddPlayer(false)}
-              />
-            </>
+            <ModalAddPlayer
+              isOpen={isShowModalAddPlayer}
+              onClose={() => setIsShowModalAddPlayer(false)}
+            />
           )}
 
           {listPlayer && listPlayer.length > 0 && (
@@ -122,7 +120,7 @@ const styles: StyleSheet = {
 
   icon: {
     my: 0.5,
-    p: 1,
+    p: 0.4,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -139,7 +137,7 @@ const styles: StyleSheet = {
 
   title: {
     color: '#696969',
-    fontSize: '1.3rem',
+    fontSize: '1.2rem',
     fontWeight: 600,
   },
 

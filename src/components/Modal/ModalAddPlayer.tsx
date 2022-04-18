@@ -101,6 +101,7 @@ const ModalAddPlayer = ({ isOpen, onClose }: Props) => {
         <Button
           variant='contained'
           size='medium'
+          disabled={listInputPlayer.length !== 4}
           startIcon={<SaveIcon />}
           onClick={handleSetPlayers}
         >
