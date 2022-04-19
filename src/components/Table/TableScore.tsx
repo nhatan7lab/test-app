@@ -1,12 +1,8 @@
-import {
-  Table,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TableBody,
-  TableCell,
-  Paper,
-} from '@mui/material';
+import { CSSProperties, useCallback } from 'react';
+import { Box } from '@mui/material';
+import { FaPoop } from 'react-icons/fa';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 import useScoreStore, { ScoreStore } from 'store';
 import { Player, Score, StyleSheet } from 'types';
@@ -17,7 +13,25 @@ const TableScore = () => {
     (state: ScoreStore) => state.players,
   );
 
-  const listHeader: string[] = listPlayer.map((player: Player) => player.name);
+  type Header = {
+    name: string;
+    top: number;
+  };
+
+  const getTopByTotalScore = useCallback(
+    (listPlayer: Player[], total: number): number => {
+      const listSorted = [...listPlayer].sort((a, b) => b.total - a.total);
+      const index = listSorted.findIndex((player) => player.total === total);
+
+      return index >= 0 ? index + 1 : index;
+    },
+    [],
+  );
+
+  const listHeader: Header[] = listPlayer.map((player: Player) => ({
+    name: player.name,
+    top: getTopByTotalScore(listPlayer, player.total),
+  }));
 
   const getListScore = (): Score[][] => {
     const listScore: Score[] = listPlayer
@@ -35,79 +49,215 @@ const TableScore = () => {
   const getListScoreTotal = (): number[] =>
     listPlayer.map((player) => player.total);
 
+  const getTopIcon = (top: number) => {
+    const style: CSSProperties = {
+      fontSize: '2rem',
+    };
+
+    const styleGolden: CSSProperties = {
+      color: '#fbc02d',
+    };
+
+    const styleSliver: CSSProperties = {
+      color: ' #C0C0C0',
+    };
+
+    const styleBronze: CSSProperties = {
+      color: '#CD7F32',
+    };
+
+    const styleShit: CSSProperties = {
+      color: '#795548',
+    };
+
+    switch (top) {
+      case 1:
+        return (
+          <WorkspacePremiumIcon
+            style={{
+              ...style,
+              ...styleGolden,
+            }}
+          />
+        );
+      case 2:
+        return (
+          <MilitaryTechIcon
+            style={{
+              ...style,
+              ...styleSliver,
+            }}
+          />
+        );
+      case 3:
+        return (
+          <MilitaryTechIcon
+            style={{
+              ...style,
+              ...styleBronze,
+            }}
+          />
+        );
+      case 4:
+        return (
+          <FaPoop
+            style={{
+              ...styles,
+              ...styleShit,
+            }}
+          />
+        );
+    }
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {listHeader.map((col, index) => (
-              <TableCell sx={styles.cellRound} key={index}>
-                {col}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {listPlayer.length > 0 && (
-            <TableRow>
-              {getListScoreTotal().map((cell, index) => (
-                <TableCell key={index} sx={styles.cellTotal}>
-                  {cell}
-                </TableCell>
-              ))}
-            </TableRow>
-          )}
-          {getListScore().map((row: Score[], indexRow: number) => (
-            <TableRow key={indexRow} sx={styles.row}>
-              {row.map((score: Score, indexScore: number) => (
-                <TableCell key={indexScore} align='center'>
-                  {score.score}
-                </TableCell>
-              ))}
-            </TableRow>
+    <>
+      <Box sx={styles.header}>
+        <Box sx={styles.row}>
+          {listHeader.map((col, index) => (
+            <Box
+              sx={{
+                ...styles.cell,
+                position: 'relative',
+                px: 2,
+                '@media (max-width:600px)': {
+                  py: 4,
+                },
+              }}
+              key={index}
+            >
+              {getListScore().length > 0 && (
+                <Box sx={styles.medal}>{getTopIcon(col.top)}</Box>
+              )}
+              {col.name}
+            </Box>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </Box>
+        <Box sx={styles.row}>
+          {getListScoreTotal().map((col, index) => (
+            <Box sx={styles.cellTotal} key={index}>
+              {col}
+            </Box>
+          ))}
+        </Box>
+        <Box sx={styles.body}>
+          {getListScore().map((row: Score[], indexRow: number) => (
+            <Box key={indexRow} sx={styles.row}>
+              {row.map((score: Score, indexScore: number) => (
+                <Box key={indexScore} sx={styles.cell}>
+                  {score.score}
+                </Box>
+              ))}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </>
   );
 };
 
 const styles: StyleSheet = {
-  titleRound: {
-    width: 10,
-    fontSize: '1rem',
-    fontWeight: 600,
-    color: '#fff',
-    backgroundColor: '#298be6',
-    textAlign: 'center',
+  header: {
+    position: 'sticky',
+    top: '63px',
   },
 
-  cellRound: {
-    fontSize: '1rem',
-    fontWeight: 600,
-    textAlign: 'center',
+  body: {
+    overflow: 'auto',
+    height: 'calc(100vh - 220px)',
   },
 
-  titleTotal: {
-    backgroundColor: '#f1f1f1',
-    textAlign: 'center',
+  row: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
   },
+
+  cell: {
+    fontSize: '1.2rem',
+    fontWeight: 600,
+    textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    backgroundColor: '#fff',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+  },
+
+  medal: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+  },
+
   cellTotal: {
-    fontSize: '1rem',
-    color: '#fff',
-    fontWeight: 600,
-    backgroundColor: '#e6b429',
+    fontSize: '1.3rem',
+    fontWeight: 700,
     textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+    color: '#fff',
+    backgroundColor: '#e6b429',
   },
 
-  row: { '&:last-child td, &:last-child th': { border: 0 } },
-
-  round: {
-    width: 10,
-    fontSize: '1rem',
-    fontWeight: 600,
-    backgroundColor: '#f1f1f1',
+  cellTop1: {
+    fontSize: '1.3rem',
+    fontWeight: 700,
     textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+    backgroundColor: '#4caf50',
+    color: '#fff',
+  },
+
+  cellTop2: {
+    fontSize: '1.3rem',
+    fontWeight: 700,
+    textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+    backgroundColor: '#0288d1',
+    color: '#fff',
+  },
+
+  cellTop3: {
+    fontSize: '1.3rem',
+    fontWeight: 700,
+    textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+    backgroundColor: '#f57c00',
+    color: '#fff',
+  },
+
+  cellTop4: {
+    fontSize: '1.3rem',
+    fontWeight: 700,
+    textAlign: 'center',
+    px: 2,
+    py: 2,
+    flex: '1 1 0',
+    wordBreak: 'break-word',
+    borderBottom: '1px solid #eee',
+    backgroundColor: '#ff5722',
+    color: '#fff',
+  },
+
+  icon: {
+    fontSize: '2rem',
   },
 };
 

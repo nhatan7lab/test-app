@@ -41,8 +41,12 @@ const ItemScore = memo(({ id, name, onChange }: Props) => {
               Number.isInteger(+event.target.value) ||
               event.target.value === '-'
             ) {
-              setCurrentScore(event.target.value);
-              handleChange(+event.target.value);
+              let value = event.target.value;
+              if (value.startsWith('0') && value.length > 1) {
+                value = value.slice(1);
+              }
+              setCurrentScore(value);
+              handleChange(+value);
             }
           }}
         />

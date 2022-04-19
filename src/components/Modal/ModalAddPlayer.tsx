@@ -71,7 +71,7 @@ const ModalAddPlayer = ({ isOpen, onClose }: Props) => {
   const [handleSetPlayers] = useDebounce(() => {
     addPlayers(getListPlayer(listInputPlayer));
     onClose();
-  }, 1000);
+  });
 
   useEffect(() => {
     setListInputPlayer([]);
