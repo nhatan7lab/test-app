@@ -119,7 +119,7 @@ const TableScore = () => {
               sx={{
                 ...styles.cell,
                 position: 'relative',
-                px: 2,
+                px: 0.5,
                 '@media (max-width:600px)': {
                   py: 4,
                 },
@@ -174,15 +174,15 @@ const styles: StyleSheet = {
   },
 
   cell: {
-    fontSize: '1.2rem',
-    fontWeight: 600,
+    fontSize: '1.3rem',
+    fontWeight: 700,
     textAlign: 'center',
     px: 2,
     py: 2,
     flex: '1 1 0',
     backgroundColor: '#fff',
     wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
+    borderBottom: '2px solid #eee',
   },
 
   medal: {
@@ -199,61 +199,9 @@ const styles: StyleSheet = {
     py: 2,
     flex: '1 1 0',
     wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
+    borderBottom: '2px solid #eee',
     color: '#fff',
     backgroundColor: '#e6b429',
-  },
-
-  cellTop1: {
-    fontSize: '1.3rem',
-    fontWeight: 700,
-    textAlign: 'center',
-    px: 2,
-    py: 2,
-    flex: '1 1 0',
-    wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
-    backgroundColor: '#4caf50',
-    color: '#fff',
-  },
-
-  cellTop2: {
-    fontSize: '1.3rem',
-    fontWeight: 700,
-    textAlign: 'center',
-    px: 2,
-    py: 2,
-    flex: '1 1 0',
-    wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
-    backgroundColor: '#0288d1',
-    color: '#fff',
-  },
-
-  cellTop3: {
-    fontSize: '1.3rem',
-    fontWeight: 700,
-    textAlign: 'center',
-    px: 2,
-    py: 2,
-    flex: '1 1 0',
-    wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
-    backgroundColor: '#f57c00',
-    color: '#fff',
-  },
-
-  cellTop4: {
-    fontSize: '1.3rem',
-    fontWeight: 700,
-    textAlign: 'center',
-    px: 2,
-    py: 2,
-    flex: '1 1 0',
-    wordBreak: 'break-word',
-    borderBottom: '1px solid #eee',
-    backgroundColor: '#ff5722',
-    color: '#fff',
   },
 
   icon: {
